@@ -1,6 +1,9 @@
 const pool = require("../../../config/database");
 
 module.exports = {
+  test: callBack => {
+    return callBack(null, "I am a test");
+  },
   /**
    * Retrieve a limited set of algorithms based on specified conditions.
    *

@@ -6,6 +6,7 @@ const {
   find_bookmark,
   find_bookmarked_algos,
   find_vote,
+  test,
 } = require("./II.controller");
 
 const router = require("express").Router();
@@ -17,5 +18,7 @@ router.post("/show_tags", show_tags);
 router.post("/find_bookmark", find_bookmark);
 router.post("/find_bookmarked_algos", find_bookmarked_algos);
 router.post("/find_vote", find_vote);
+
+router.get("/test", test);
 
 module.exports = router;

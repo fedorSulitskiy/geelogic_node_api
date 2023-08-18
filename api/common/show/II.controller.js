@@ -6,10 +6,19 @@ const {
   find_bookmark,
   find_bookmarked_algos,
   find_vote,
+  test,
 } = require("./I.service");
 const logger = require("../../../logger/logger");
 
 module.exports = {
+  test: (req, res) => {
+    test((err, results) => {
+      if (err) {
+        return res.status(500).send("Database connection error");
+      }
+      return res.status(200).send(results);
+    });
+  },
   show: (req, res) => {
     const body = req.body;
     show(body, (err, results) => {
