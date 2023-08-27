@@ -200,7 +200,7 @@ module.exports = {
    */
   remove_tag: (data, callBack) => {
     pool.query(
-      `DELETE FROM tags 
+      `DELETE FROM algo_tag 
       WHERE algo_id = ? AND tag_id = ?`,
       [data.algo_id, data.tag_id],
       (error, results, fields) => {
