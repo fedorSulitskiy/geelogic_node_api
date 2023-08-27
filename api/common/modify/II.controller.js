@@ -6,6 +6,7 @@ const {
   remove,
   remove_bookmark,
   remove_vote,
+  remove_tag,
 } = require("./I.service");
 
 const logger = require("../../../logger/logger");
@@ -88,4 +89,15 @@ module.exports = {
       return res.status(200).send(results);
     });
   },
+  remove_tag: (req, res) => {
+    const body = req.body;
+    remove_tag(body, (err, results) => {
+      if (err) {
+        logger.error(`"${err}" - 500`);
+        return res.status(500).send("Database connection error");
+      }
+      logger.info('"DELETE node_api/remove_tag" - 200');
+      return res.status(200).send(results);
+    });
+  }
 };
