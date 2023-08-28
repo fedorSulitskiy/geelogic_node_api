@@ -1,4 +1,5 @@
 const {
+  totalShow,
   show,
   show_by_id,
   show_by_user,
@@ -6,16 +7,18 @@ const {
   find_bookmark,
   find_bookmarked_algos,
   find_vote,
-  test,
 } = require("./I.service");
 const logger = require("../../../logger/logger");
 
 module.exports = {
-  test: (req, res) => {
-    test((err, results) => {
+  totalShow: (req, res) => {
+    const body = req.body;
+    totalShow(body, (err, results) => {
       if (err) {
+        logger.error(`"${err}" - 500`);
         return res.status(500).send("Database connection error");
       }
+      logger.info('"POST node_api/totalShow" - 200');
       return res.status(200).send(results);
     });
   },
@@ -92,7 +95,7 @@ module.exports = {
         logger.error(`"${err}" - 500`);
         return res.status(500).send("Database connection error");
       }
-      logger.info('"POST node_api/find_votes" - 200');
+      logger.info('"POST node_api/find_vote" - 200');
       return res.status(200).send(results);
     });
   },

@@ -1,8 +1,45 @@
 const pool = require("../../../config/database");
 
 module.exports = {
-  test: callBack => {
-    return callBack(null, "I am a test");
+  totalShow: (data, callBack) => {
+    pool.query(
+      `SELECT
+          a.algo_id AS id,
+          a.title,
+          a.up_votes AS upVotes,
+          a.down_votes AS downVotes,
+          DATE_FORMAT(a.date_created, '%Y-%m-%d %H:%i:%s') AS datePosted,
+          a.photo AS image,
+          a.description,
+          IF(b.user_id IS NOT NULL, true, false) AS isBookmarked,
+          a.api,
+          a.code,
+          a.user_creator,
+          GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
+          v.vote AS userVote
+      FROM algos a
+      LEFT JOIN algo_tag at ON a.algo_id = at.algo_id
+      LEFT JOIN tags t ON at.tag_id = t.tag_id
+      LEFT JOIN bookmarked b ON a.algo_id = b.algo_id AND b.user_id = ?
+      LEFT JOIN votes v ON a.algo_id = v.algo_id AND v.user_id = ?
+      WHERE a.api IN (${data.api_condition})
+      GROUP BY a.algo_id
+      ORDER BY ${data.order_condition}
+      LIMIT 5
+      OFFSET ?  
+      `,
+      [
+        data.user_id,
+        data.user_id,
+        data.offset,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
   },
   /**
    * Retrieve a limited set of algorithms based on specified conditions.
