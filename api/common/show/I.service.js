@@ -129,7 +129,7 @@ module.exports = {
         LEFT JOIN bookmarked b ON a.algo_id = b.algo_id AND b.user_id = ?
         LEFT JOIN votes v ON a.algo_id = v.algo_id AND v.user_id = ?
         WHERE a.algo_id = ?
-        GROUP BY a.algo_id;
+        GROUP BY a.algo_id
         `,
       [data.user_id, data.user_id, data.algo_id],
       (error, results, fields) => {
@@ -141,20 +141,47 @@ module.exports = {
     );
   },
   /**
-   * Retrieve algorithms created by a specific user.
+   * Retrieve a list of algorithms contributed by a specific user, including additional information for display, filtering, and pagination.
    *
-   * @param {Object} data - The data object containing the user's ID.
-   * @param {string} data.user_creator - The ID of the user who created the algorithms.
+   * @param {Object} data - The data object containing user ID and user_creator (contributor) ID.
+   * @param {string} data.user_id - The ID of the user currently using the service.
+   * @param {string} data.user_creator - The ID of the user (contributor) whose contributed algorithms to retrieve.
    * @param {function} callBack - The callback function to handle the result.
    * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
-   * @param {Array} callBack.results - An array containing the algorithms created by the user.
+   * @param {Array} callBack.results - An array containing detailed information about the contributed algorithms.
    * @returns {void}
    */
-  show_by_user: (data, callBack) => {
+  find_contributed_algos: (data, callBack) => {
     pool.query(
-      `SELECT * FROM algos 
-          WHERE user_creator = ?`,
-      [data.user_creator],
+      `SELECT
+          a.algo_id AS id,
+          a.title,
+          a.up_votes AS upVotes,
+          a.down_votes AS downVotes,
+          DATE_FORMAT(a.date_created, '%Y-%m-%d %H:%i:%s') AS datePosted,
+          a.photo AS image,
+          a.description,
+          IF(b.user_id IS NOT NULL, true, false) AS isBookmarked,
+          a.api,
+          a.code,
+          a.user_creator,
+          CONCAT('[', GROUP_CONCAT(
+              JSON_OBJECT(
+                  'tag_id', t.tag_id,
+                  'tag_name', t.tag_name,
+                  'tag_description', t.tag_description
+              )
+          ), ']') AS tags,
+          v.vote AS userVote
+      FROM algos a
+      LEFT JOIN algo_tag at ON a.algo_id = at.algo_id
+      LEFT JOIN tags t ON at.tag_id = t.tag_id
+      LEFT JOIN bookmarked b ON a.algo_id = b.algo_id AND b.user_id = ?
+      LEFT JOIN votes v ON a.algo_id = v.algo_id AND v.user_id = ?
+      WHERE user_creator = ?
+      GROUP BY a.algo_id
+      `,
+      [data.user_id, data.user_id, data.user_creator],
       (error, results, fields) => {
         if (error) {
           return callBack(error);
@@ -164,103 +191,49 @@ module.exports = {
     );
   },
   /**
-   * Retrieve tags associated with a specific algorithm.
-   *
-   * @param {Object} data - The data object containing the algorithm's ID.
-   * @param {number} data.algo_id - The ID of the algorithm for which to retrieve tags.
-   * @param {function} callBack - The callback function to handle the result.
-   * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
-   * @param {Array} callBack.results - An array containing the tags associated with the algorithm.
-   * @returns {void}
-   */
-  show_tags: (data, callBack) => {
-    pool.query(
-      `SELECT t.*
-          FROM tags t
-          INNER JOIN algo_tag at ON t.tag_id = at.tag_id
-          WHERE at.algo_id = ?`,
-      [data.algo_id],
-      (error, results, fields) => {
-        if (error) {
-          return callBack(error);
-        }
-        return callBack(null, results);
-      }
-    );
-  },
-  /**
-   * Check if a bookmark exists for a specific user and algorithm.
-   *
-   * @param {Object} data - The data object containing user and algorithm IDs.
-   * @param {string} data.user_id - The ID of the user.
-   * @param {number} data.algo_id - The ID of the algorithm to check for a bookmark.
-   * @param {function} callBack - The callback function to handle the result.
-   * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
-   * @param {boolean} callBack.results - `true` if a bookmark exists for the user and algorithm, `false` otherwise.
-   * @returns {void}
-   */
-  find_bookmark: (data, callBack) => {
-    pool.query(
-      `SELECT * FROM bookmarked
-          WHERE user_id = ? AND algo_id = ?`,
-      [data.user_id, data.algo_id],
-      (error, results, fields) => {
-        if (error) {
-          return callBack(error);
-        }
-        if (results.length === 0) {
-          return callBack(null, false);
-        }
-        return callBack(null, true);
-      }
-    );
-  },
-  /**
-   * Retrieve a list of algorithms bookmarked by a specific user.
+   * Retrieve a list of algorithms bookmarked by a specific user, including additional information for display, filtering, and pagination.
    *
    * @param {Object} data - The data object containing user ID.
-   * @param {string} data.user_id - The ID of the user for whom to retrieve bookmarked algorithms.
+   * @param {string} data.user_id - The ID of the user requesting the bookmarked algorithms list.
    * @param {function} callBack - The callback function to handle the result.
    * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
-   * @param {Array} callBack.results - An array containing the algorithms bookmarked by the user.
+   * @param {Array} callBack.results - An array containing detailed information about the bookmarked algorithms.
    * @returns {void}
    */
   find_bookmarked_algos: (data, callBack) => {
     pool.query(
-      `SELECT a.*
-          FROM algos a
-          JOIN bookmarked b ON a.algo_id = b.algo_id
-      WHERE b.user_id = ?
+      `SELECT
+          a.algo_id AS id,
+          a.title,
+          a.up_votes AS upVotes,
+          a.down_votes AS downVotes,
+          DATE_FORMAT(a.date_created, '%Y-%m-%d %H:%i:%s') AS datePosted,
+          a.photo AS image,
+          a.description,
+          IF(b.user_id IS NOT NULL, true, false) AS isBookmarked,
+          a.api,
+          a.code,
+          a.user_creator,
+          CONCAT('[', GROUP_CONCAT(
+              JSON_OBJECT(
+                  'tag_id', t.tag_id,
+                  'tag_name', t.tag_name,
+                  'tag_description', t.tag_description
+              )
+          ), ']') AS tags,
+          v.vote AS userVote
+      FROM algos a
+      LEFT JOIN algo_tag at ON a.algo_id = at.algo_id
+      LEFT JOIN tags t ON at.tag_id = t.tag_id
+      INNER JOIN bookmarked b ON a.algo_id = b.algo_id AND b.user_id = ?
+      LEFT JOIN votes v ON a.algo_id = v.algo_id AND v.user_id = ?
       `,
-      [data.user_id],
+      [data.user_id, data.user_id],
       (error, results, fields) => {
         if (error) {
           return callBack(error);
         }
         return callBack(null, results);
-      }
-    );
-  },
-  /**
-   * Check if any votes (up or down) exist for a specific user and algorithm.
-   *
-   * @param {Object} data - The data object containing user and algorithm IDs.
-   * @param {string} data.user_id - The ID of the user for whom to check for existing votes.
-   * @param {number} data.algo_id - The ID of the algorithm for which to check for existing votes.
-   * @param {function} callBack - The callback function to handle the result.
-   * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
-   * @param {any} callBack.results - The results of the database query operation.
-   * @returns {void}
-   */
-  find_vote: (data, callBack) => {
-    pool.query(
-      `SELECT * FROM votes WHERE user_id = ? AND algo_id = ?`,
-      [data.user_id, data.algo_id],
-      (error, results, fields) => {
-        if (error) {
-          return callBack(error);
-        }
-        return callBack(null, results[0]);
       }
     );
   },

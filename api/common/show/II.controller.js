@@ -1,11 +1,8 @@
 const {
   show,
   show_by_id,
-  show_by_user,
-  show_tags,
-  find_bookmark,
+  find_contributed_algos,
   find_bookmarked_algos,
-  find_vote,
 } = require("./I.service");
 const logger = require("../../../logger/logger");
 
@@ -32,36 +29,14 @@ module.exports = {
       return res.status(200).send(results);
     });
   },
-  show_by_user: (req, res) => {
+  find_contributed_algos: (req, res) => {
     const body = req.body;
-    show_by_user(body, (err, results) => {
+    find_contributed_algos(body, (err, results) => {
       if (err) {
         logger.error(`"${err}" - 500`);
         return res.status(500).send("Database connection error");
       }
-      logger.info('"POST node_api/show_by_user" - 200');
-      return res.status(200).send(results);
-    });
-  },
-  show_tags: (req, res) => {
-    const body = req.body;
-    show_tags(body, (err, results) => {
-      if (err) {
-        logger.error(`"${err}" - 500`);
-        return res.status(500).send("Database connection error");
-      }
-      logger.info('"POST node_api/show_tags" - 200');
-      return res.status(200).send(results);
-    });
-  },
-  find_bookmark: (req, res) => {
-    const body = req.body;
-    find_bookmark(body, (err, results) => {
-      if (err) {
-        logger.error(`"${err}" - 500`);
-        return res.status(500).send("Database connection error");
-      }
-      logger.info('"POST node_api/find_bookmark" - 200');
+      logger.info('"POST node_api/find_contributed_algos" - 200');
       return res.status(200).send(results);
     });
   },
@@ -73,17 +48,6 @@ module.exports = {
         return res.status(500).send("Database connection error");
       }
       logger.info('"POST node_api/find_bookmarked_algos" - 200');
-      return res.status(200).send(results);
-    });
-  },
-  find_vote: (req, res) => {
-    const body = req.body;
-    find_vote(body, (err, results) => {
-      if (err) {
-        logger.error(`"${err}" - 500`);
-        return res.status(500).send("Database connection error");
-      }
-      logger.info('"POST node_api/find_vote" - 200');
       return res.status(200).send(results);
     });
   },
