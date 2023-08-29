@@ -1,5 +1,4 @@
 const {
-  totalShow,
   show,
   show_by_id,
   show_by_user,
@@ -11,7 +10,6 @@ const {
 
 const router = require("express").Router();
 
-router.post("/totalShow", totalShow);
 router.post("/show", show);
 router.post("/show_by_id", show_by_id);
 router.post("/show_by_user", show_by_user);

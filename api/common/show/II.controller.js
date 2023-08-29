@@ -1,5 +1,4 @@
 const {
-  totalShow,
   show,
   show_by_id,
   show_by_user,
@@ -11,17 +10,6 @@ const {
 const logger = require("../../../logger/logger");
 
 module.exports = {
-  totalShow: (req, res) => {
-    const body = req.body;
-    totalShow(body, (err, results) => {
-      if (err) {
-        logger.error(`"${err}" - 500`);
-        return res.status(500).send("Database connection error");
-      }
-      logger.info('"POST node_api/totalShow" - 200');
-      return res.status(200).send(results);
-    });
-  },
   show: (req, res) => {
     const body = req.body;
     show(body, (err, results) => {
