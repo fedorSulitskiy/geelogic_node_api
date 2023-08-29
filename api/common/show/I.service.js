@@ -2,7 +2,8 @@ const pool = require("../../../config/database");
 
 module.exports = {
   totalShow: (data, callBack) => {
-    pool.query(
+    let totalCount, limitedResults;
+    pool.query(    
       `SELECT
           a.algo_id AS id,
           a.title,
@@ -39,7 +40,27 @@ module.exports = {
         if (error) {
           return callBack(error);
         }
-        return callBack(null, results);
+
+        limitedResults = results;
+
+        // Second query to get total count
+        pool.query(
+          `SELECT COUNT(*) AS total FROM algos 
+              WHERE api IN (${data.api_condition})`,
+          (countError, countResult, countFields) => {
+            if (countError) {
+              return callBack(countError);
+            }
+
+            totalCount = countResult[0].total;
+
+            // After gathering all data, send the response
+            callBack(null, {
+              results: limitedResults,
+              totalCount: totalCount,
+            });
+          }
+        );
       }
     );
   },
