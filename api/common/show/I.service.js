@@ -30,7 +30,9 @@ module.exports = {
     //  => '1'    - python
     //  => '0, 1' - javascript and python
     pool.query(
-      `SELECT
+      `
+      SET SESSION group_concat_max_len = 1000000;
+      SELECT
           a.algo_id AS id,
           a.title,
           a.up_votes AS upVotes,
@@ -67,7 +69,7 @@ module.exports = {
           return callBack(error);
         }
 
-        limitedResults = results;
+        limitedResults = results[1];
 
         // Second query to get total count
         pool.query(
@@ -155,7 +157,9 @@ module.exports = {
    */
   find_contributed_algos: (data, callBack) => {
     pool.query(
-      `SELECT
+      `
+      SET SESSION group_concat_max_len = 1000000;
+      SELECT
           a.algo_id AS id,
           a.title,
           a.up_votes AS upVotes,
@@ -188,7 +192,7 @@ module.exports = {
         if (error) {
           return callBack(error);
         }
-        return callBack(null, results);
+        return callBack(null, results[1]);
       }
     );
   },
@@ -204,7 +208,9 @@ module.exports = {
    */
   find_bookmarked_algos: (data, callBack) => {
     pool.query(
-      `SELECT
+      `
+      SET SESSION group_concat_max_len = 1000000;
+      SELECT
           a.algo_id AS id,
           a.title,
           a.up_votes AS upVotes,
@@ -235,7 +241,7 @@ module.exports = {
         if (error) {
           return callBack(error);
         }
-        return callBack(null, results);
+        return callBack(null, results[1]);
       }
     );
   },
