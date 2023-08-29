@@ -103,7 +103,9 @@ module.exports = {
    */
   show_by_id: (data, callBack) => {
     pool.query(
-      `SELECT
+      `
+      SET SESSION group_concat_max_len = 1000000;
+      SELECT
             a.algo_id AS id,
             a.title,
             a.up_votes AS upVotes,
