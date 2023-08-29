@@ -211,4 +211,27 @@ module.exports = {
       }
     );
   },
+  /**
+   * Remove all tag associations from a specific algorithm.
+   *
+   * @param {Object} data - The data object containing algorithm ID.
+   * @param {number} data.algo_id - The ID of the algorithm from which to remove all tag associations.
+   * @param {function} callBack - The callback function to handle the result.
+   * @param {Error|null} callBack.error - An error object if an error occurred during the database operation.
+   * @param {any} callBack.results - The results of the database deletion operation.
+   * @returns {void}
+   */
+  remove_all_tags: (data, callBack) => {
+    pool.query(
+      `DELETE FROM algo_tag 
+      WHERE algo_id = ?`,
+      [data.algo_id],
+      (error, results, fields) => {
+        if (error) {
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
 };
