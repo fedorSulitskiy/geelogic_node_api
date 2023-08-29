@@ -15,7 +15,13 @@ module.exports = {
           a.api,
           a.code,
           a.user_creator,
-          GROUP_CONCAT(DISTINCT t.tag_name) AS tags,
+          CONCAT('[', GROUP_CONCAT(
+              JSON_OBJECT(
+                  'tag_id', t.tag_id,
+                  'tag_name', t.tag_name,
+                  'tag_description', t.tag_description
+              )
+          ), ']') AS tags,
           v.vote AS userVote
       FROM algos a
       LEFT JOIN algo_tag at ON a.algo_id = at.algo_id
@@ -28,11 +34,7 @@ module.exports = {
       LIMIT 5
       OFFSET ?  
       `,
-      [
-        data.user_id,
-        data.user_id,
-        data.offset,
-      ],
+      [data.user_id, data.user_id, data.offset],
       (error, results, fields) => {
         if (error) {
           return callBack(error);
